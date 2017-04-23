@@ -31,6 +31,7 @@ def step_run_cli(context):
     cmd_parts = [cli_cmd] + run_args
     cmd = ' '.join(cmd_parts)
     context.cli = pexpect.spawnu(cmd, cwd='..')
+    context.cli.logfile = open('/tmp/dmtest', 'w')
     context.exit_sent = False
 
 
@@ -41,7 +42,7 @@ def step_wait_prompt(context):
     host = context.conf['host']
     dbname = context.conf['dbname']
     wrappers.expect_exact(context, 'mysql {0}@{1}:{2}> '.format(
-        user, host, dbname), timeout=5)
+        user, host, dbname), timeout=5, ignore_before=True)
 
 
 @when('we send "ctrl + d"')
@@ -59,3 +60,5 @@ def step_send_help(context):
 
     """
     context.cli.sendline('\\?')
+    wrappers.expect_exact(
+        context, context.conf['pager_boundary'] + '\r\n', timeout=5, ignore_before=True)
